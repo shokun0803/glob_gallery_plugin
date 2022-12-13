@@ -22,7 +22,7 @@ function image_lists() {
 	global $post, $wp_rewrite;
 	$outfile = 2;
 	$expiration = 60 * 60 * 24;
-	$pattern = 'wp-content/uploads/*/*/{*.jpg,*.png}';
+	$pattern = wp_upload_dir()['basedir'] . '/*/*/{*.jpg,*.png}';
 	$paged = get_query_var( 'paged' );
 	$transient = 'gallery_' . $post->ID . '_' . $paged;
 	if( false === ( $ret = get_transient( $transient ) ) ) {
@@ -32,15 +32,17 @@ function image_lists() {
 		$imgs = ( $paged == 0 )? array_slice( $imgs, 0, $outfile ): array_slice( $imgs, ( $paged - 1 ) * $outfile, $outfile );
 		$tag[] = "<figure class=\"is-layout-flex wp-block-gallery-{$post->ID} wp-block-gallery has-nested-images columns-default is-cropped\">";
 		foreach( $imgs as $img ) {
-			$tag[] = "<figure class=\"wp-block-image size-large\"><img src=\"/{$img}\" width=\"150\" alt=\"\" /></figure>";
+			$img_path = get_site_url() . str_replace( $_SERVER['DOCUMENT_ROOT'], '', $img );
+			$img_size = getimagesize( $img );
+			$tag[] = "<figure class=\"wp-block-image size-large\"><img src=\"{$img_path}\" {$img_size[3]} alt=\"\" /></figure>";
 		}
 		$tag[] = "</figure>";
 		$paginate_base = get_pagenum_link(1);
-		if(strpos($paginate_base, '?') || !$wp_rewrite->using_permalinks()){
+		if( strpos( $paginate_base, '?' ) || !$wp_rewrite->using_permalinks() ) {
 			$paginate_format = '';
-			$paginate_base = add_query_arg('paged','%#%');
+			$paginate_base = add_query_arg( 'paged','%#%' );
 		}else{
-			$paginate_format = (substr($paginate_base,-1,1) == '/' ? '' : '/') . user_trailingslashit('page/%#%/','paged');
+			$paginate_format = ( substr( $paginate_base, -1, 1 ) == '/' ? '' : '/' ) . user_trailingslashit( 'page/%#%/', 'paged' );
 			$paginate_base .= '%_%';
 		}
 		$tag[] = paginate_links(array(
