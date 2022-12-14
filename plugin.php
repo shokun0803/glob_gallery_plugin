@@ -48,6 +48,7 @@ function image_lists( $atts ) {
 					$img_size = '';
 				}
 			}
+			$img_size = htmlspecialchars( $img_size, ENT_NOQUOTES );
 			$tag[] = "<figure class=\"wp-block-image size-large\"><img src=\"{$img_path}\" {$img_size} alt=\"\" /></figure>";
 		}
 		$tag[] = "</figure>";
