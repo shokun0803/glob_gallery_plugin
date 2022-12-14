@@ -6,15 +6,15 @@ After installing and activating the plugin in WordPress, write the shortcode [im
 The attribute values and default values that can be specified are as follows.
 
 * outfile -> The number of images to display on one page.
-  * default : 4
+  * default : `4`
 * expiration -> Time to cache in transient.
-  * default : 60 * 60 * 24
+  * default : `60 * 60 * 24`
 * directory -> Specifies the directory where WordPress installed images are uploaded.
-  * default : wp_upload_dir()['basedir'] . '/*/*/{*.jpg,*.jpeg,*.png,*.webp,*.gif}'
+  * default : `wp_upload_dir()['basedir'] . '/*/*/{*.jpg,*.jpeg,*.png,*.webp,*.gif}'`
 * img_size -> Please specify the image size specified in the img tag as an attribute.  
 Specify 'origin' to use the original size.  
 However, if the directory specification is a relative address, the image size is not obtained and the attribute is not specified.
-  * default : width="150"
+  * default : `width="150"`
 
 ## Example of use
 `[image_lists outfile=2 expiration=60 directory='wp-content/uploads/2020/*/{*.jpg,*.png}' img_size='width="200"']`
