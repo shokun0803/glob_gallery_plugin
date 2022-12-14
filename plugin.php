@@ -18,23 +18,37 @@ License: GPL2
     Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-function image_lists() {
+function image_lists( $atts ) {
 	global $post, $wp_rewrite;
-	$outfile = 2;
-	$expiration = 60 * 60 * 24;
-	$pattern = wp_upload_dir()['basedir'] . '/*/*/{*.jpg,*.png}';
+	extract( shortcode_atts( array(
+		'outfile' => 4,
+		'expiration' => 60 * 60 * 24,
+		'directory' => wp_upload_dir()['basedir'] . '/*/*/{*.jpg,*.jpeg,*.png,*.webp,*.gif}',
+		'img_size' => 'width="150"',
+	), $atts ) );
+	$origin = $img_size == 'origin'? 'origin' : '';
+	$pattern = $directory;
 	$paged = get_query_var( 'paged' );
 	$transient = 'gallery_' . $post->ID . '_' . $paged;
 	if( false === ( $ret = get_transient( $transient ) ) ) {
 		$tag = array();
-		$imgs = glob( $pattern, GLOB_BRACE );
+		$imgs = preg_grep( '/(\-[\d]+?x[\d]+?)\./', glob( $pattern, GLOB_BRACE ), PREG_GREP_INVERT );
 		$totalpage = ceil( count( $imgs ) / $outfile );
 		$imgs = ( $paged == 0 )? array_slice( $imgs, 0, $outfile ): array_slice( $imgs, ( $paged - 1 ) * $outfile, $outfile );
 		$tag[] = "<figure class=\"is-layout-flex wp-block-gallery-{$post->ID} wp-block-gallery has-nested-images columns-default is-cropped\">";
 		foreach( $imgs as $img ) {
-			$img_path = get_site_url() . str_replace( $_SERVER['DOCUMENT_ROOT'], '', $img );
-			$img_size = getimagesize( $img );
-			$tag[] = "<figure class=\"wp-block-image size-large\"><img src=\"{$img_path}\" {$img_size[3]} alt=\"\" /></figure>";
+			if( substr( $img, 0, 1 ) == '/' ) {
+				$img_path = get_site_url() . str_replace( $_SERVER['DOCUMENT_ROOT'], '', $img );
+				if( $origin == 'origin' ) {
+					$img_size = getimagesize( $img )[3];
+				}
+			} else {
+				$img_path = get_site_url() . '/' . $img;
+				if( $origin == 'origin' ) {
+					$img_size = '';
+				}
+			}
+			$tag[] = "<figure class=\"wp-block-image size-large\"><img src=\"{$img_path}\" {$img_size} alt=\"\" /></figure>";
 		}
 		$tag[] = "</figure>";
 		$paginate_base = get_pagenum_link(1);
